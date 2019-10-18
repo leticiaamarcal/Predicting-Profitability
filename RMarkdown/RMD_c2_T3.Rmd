@@ -1,0 +1,185 @@
+---
+title: "Multiple Regression in R"
+author: "Letícia Marçal"
+date: "2019-10-15"
+output: html_document
+---
+
+## Results
+After predicting the volume of each product, we reach the result below.
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+# create nice tables
+library(kableExtra)
+library(knitr)
+```
+
+
+```{r}
+predictionsData <- read.csv("C:/Users/letic/Documents/UbiqumR/Course2_task3/predictions_c2t3_exc.csv")
+
+rownames(predictionsData) <- predictionsData$ID
+
+predictionsData <- predictionsData[,-1]
+
+kable(predictionsData) %>% 
+        kable_styling(bootstrap_options = c("striped", "hover")) %>%  
+        row_spec(1:5, bold = T, color = "black", background = "palegreen")
+            
+```
+
+## Background
+
+A model was created to predict the sales volume of 24 products. For this, the type of the product was taken into consideration. Attention was given to the following groups: Laptop, Netbook, PC and Smartphone. This was a request from the sales team. 
+
+Another three attributes were used in the model: 2 Stars Review, 4 Stars Review and Positive Service Review.
+
+![.](Charts/correlationMatrix.jpeg)
+
+As soon as our goal was to predict the volume, it is necessary to understand how and if each attribute influence it. For this, it was used correlation matrix. In the table bellow, it is possible to see that the stronger the color is, the greater the correlation between the attributes. 
+
+It is important to pay attention to the relationship between the attributes and the target (volume) and to notice strong correlation between attributes that can say the same thing. When it happens, we can double the weight of the same information, creating a distortion when we build the model. 
+
+5 Star Reviews has the highest possible correlation (1) with volume. If placed on the model, this attribute would have a great weight and would not necessarily reflect reality. The model built using features of a product that became fashionable for a short time and had large 5-star ratings, for example, may be misinterpreted as pattern. 
+ 
+So 4 Star Reviews was chosen instead. Due to the strong correlation with 4 Stars (0.937), 3 Stars was not used in the model. Same goes for 1 Star and 2 Stars. So to be balanced, just 2 Star Reviews and 4 Star Reviews were used in the model.  
+Positive Service Review has a great correlation with Volume and substantially increased the accuracy of the model. 
+
+
+
+
+
+
+
+
+
+testing has 19 rows
+training has 61
+
+correlation matrix
+ Volume
+Laptop                -0.06979958
+Netbook               -0.07001054
+PC                    -0.10289168
+Smartphone            -0.03850828
+Price                 -0.14234399
+x5StarReviews          1.00000000
+x4StarReviews          0.87900639
+x3StarReviews          0.76337319
+x2StarReviews          0.48727933
+x1StarReviews          0.25502390
+PositiveServiceReview  0.62226022
+NegativeServiceReview  0.30941899
+Recommendproduct       0.16954126
+ShippingWeight        -0.18802398
+ProductDepth           0.06610525
+ProductWidth          -0.14343661
+ProductHeight         -0.16000400
+ProfitMargin          -0.01344860
+Volume                 1.00000000
+
+134, 135, 136, 137, 138, 139, 140, 141 - excluir porque era cluster sem sentido
+(todos os valores sao iguais para esta linha, com exceçao do preço)
+129, 132, 166 eram volume = 0
+
+outliers por ID que sao importante tirar de cada atributo
+Volume - 150 e 198
+4S - 150, 198, 148
+2S - 123, 150, 148
+Posit - 150, 118, 123, 148
+
+IDs a serem retirado: 118, 123, 148, 150, 198
+
+tirei 16 linhas (20%)
+11 foram de dados incorretos e 5 de outliers 
+tentei ficar no 20% do dado e manter alguns outliers
+
+####Linear Regression (LR, LRmodel_pred_test)
+#metrica Train
+# RMSE: 195.8234
+# Rsquared: 0.8793424
+# MAE: 125.2005
+#métrica Test
+# RMSE: 79.4592628  
+# Rsquared: 0.9894325
+# MAE: 62.1087898
+
+######SVM Linear (SVMmodel/ SVMmodel_pred_test) 
+#metricas Train
+# RMSE: 176.2364
+# Rsquared: 0.9227287
+# MAE: 112.2782
+#metricas Test
+# RMSE: 60.1533528
+# Rsquared: 0.9910691
+# MAE: 49.1541237 
+
+#####Random Forest  (RFmodel/ RFmodel_pred_test) 
+#metricas Train
+# mtry  RMSE      Rsquared   MAE      
+# 7     159.4774  0.9245442   94.30795
+#metricas Test
+# RMSE: 86.6370612
+# Rsquared: 0.9787145
+# MAE: 40.0490696
+
+#####k-NN  (KNNmodel/ KNNmodel_pred_test)
+#metricas Train
+# k  RMSE          Rsquared   MAE     
+# 7  208.1914  0.8670417  123.2562
+#metricas Test
+# RMSE: 126.1550107 
+# Rsquared: 0.9599681 
+# MAE: 0.9599681
+
+ Random Forest e SVM Linear foram os melhores
+ 
+ Predictions com RF
+ ID	Prediction Volume
+171	511.78053
+172	133.4268
+173	155.83787
+175	41.33853
+176	18.23613
+178	57.55173
+180	1213.8808
+181	135.81973
+183	31.126
+186	1244.214
+187	1486.09547
+193	467.04533
+194	661.34427
+195	84.24653
+196	163.05507
+199	1311.4868
+201	19.71414
+301	33.25301
+302	63.0596
+303	122.7972
+304	82.19853
+305	19.71414
+306	13.502
+307	1367.2516
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
